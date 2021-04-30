@@ -35,7 +35,7 @@ public class PalavrasClient {
 	            
 	            switch (menuChoice) {
 	                case "1":
-	                	System.out.println("\nConsultando centros de vacinação...");
+	                	System.out.println("\n--->  Centros de Vacinação Disponíveis  <---");
 	                	
 	                	ArrayList<String> arrayCentros = obj.consultarCentros();
 	                      
@@ -55,15 +55,32 @@ public class PalavrasClient {
 	                    break;
 	                    
 	                case "2":
-	                	System.out.println("Consultando comprimento das filas de espera...");
-	                	System.out.println("Insira o nome do centro que quer ver a fila: ");
-	                	Scanner scanner2 = new Scanner(System.in);
-	                	int verCentro = scanner.nextInt();
-	                	System.out.println("A verificar " + verCentro + " ....");
+	                	System.out.println("\n--->  Consulta das listas de espera dos Centros Disponíveis  <---\n");
 	                	
-	                	int tamanhoFila = obj.consultarFila(verCentro);
+	                	int auxiliar = 0;
 	                	
-	                	System.out.println("O Centro de saúde tem uma fila de tamanho " + tamanhoFila);
+	                	while(auxiliar == 0) {
+	                		System.out.println("Insira o nome do centro que quer ver a fila: ");
+		                	Scanner scanner2 = new Scanner(System.in);
+		                	int verCentro = scanner.nextInt();
+		                	System.out.println("A verificar " + verCentro + " ....");
+		                	
+		                	int tamanhoFila = obj.consultarFila(verCentro);
+		                	
+		                	System.out.println("O Centro escolhido tem uma lista de espera de " + tamanhoFila + " utentes.");
+		                	
+		                	System.out.println("\nDeseja consultar mais algum centro? S (sim) ou N (não)");
+		                	String escolha = scanner2.next();
+		                	
+		                	if(escolha.equals("N")) {
+		                		auxiliar = 1;
+		                	} else if(escolha.equals("S")) {
+		                		continue;
+		                	}else {
+		                		System.out.println("Formato de resposta não reconhecido.");
+		                		break;
+		                	}
+	                	}
 	                    break;
 	                    
 	                case "3":
@@ -108,7 +125,7 @@ public class PalavrasClient {
 	                	System.out.println(efeitos_obtidos);
 	                    break;
 	                case "6":
-	                	System.out.println("Gerando a lista de todas as vacinas e efeitos secundários...");
+	                	System.out.println("\n--->  Lista de vacinados  <---\n");
 	                	ArrayList<String> arrayListaVacinados = obj.listaVacinados();
 	                      
                         if(arrayListaVacinados.isEmpty() == true)
@@ -122,13 +139,13 @@ public class PalavrasClient {
                             {
                             	if(i % 2 != 0) {
                             		System.out.println(arrayListaVacinados.get(i));
-                            	} else {
-                            		System.out.print(arrayListaVacinados.get(i) + " ");
+                            	} else  {
+                            		System.out.print(arrayListaVacinados.get(i) + " pessoas vacinadas com ");
                             	}
                             }
                         }
                         
-                        System.out.println("Efeitos secundários por vacina");
+                        System.out.println("\n--->  Lista de Efeitos Secundários por vacina  <---\n");
                         
                         ArrayList<String> arrayEfeitosSecundarios = obj.listaEfeitosSecundarios();
 	                      
@@ -144,7 +161,7 @@ public class PalavrasClient {
                             	if(i % 2 != 0) {
                             		System.out.println(arrayEfeitosSecundarios.get(i));
                             	} else {
-                            		System.out.print(arrayEfeitosSecundarios.get(i) + " ");
+                            		System.out.print(arrayEfeitosSecundarios.get(i) + " pessoas tiveram efeitos secundários com a vacina da ");
                             	}
                             }
                         }

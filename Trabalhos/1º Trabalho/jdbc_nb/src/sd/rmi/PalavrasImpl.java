@@ -147,7 +147,7 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
              rs.close();
         	 stm.close();
         	 
-        	 return "\nInscrição validada com sucesso. Guarde o código seguinte (para registo de toma da vacina): " + codigoRegisto +  "\n";
+        	 return "\nInscrição validada com sucesso no centro " + randomNum + ".\nGuarde o código seguinte (para registo de toma da vacina): " + codigoRegisto +  "\n";
         	 
          	 //rs = stm.executeQuery("INSERT INTO filasCentro3 VALUES(DEFAULT, " + randomNum + ",'" + nome + "'));
         	
@@ -225,7 +225,9 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
 
             //}
 	       
-	        stm.executeUpdate("INSERT INTO lista_vacinados VALUES ("+contaCentros+","+codigo+",'"+nomevac+"','"+data+"')");
+	         stm.executeUpdate("INSERT INTO lista_vacinados VALUES ("+contaCentros+","+codigo+",'"+nomevac+"','"+data+"')");
+	         
+	         stm.executeUpdate("DELETE from fila_centro where codigo_registo=" + codigo);
 	       
 	       	 stm.close();
 	       	 
@@ -309,8 +311,8 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
                String nomeVacina = rs.getString("vacina");
                String numeroVacinas = rs.getString("numero_vacinas");
 
-               arrayListaVacinados.add(nomeVacina);
                arrayListaVacinados.add(numeroVacinas);
+               arrayListaVacinados.add(nomeVacina);
            }
            rs.close();
            stm.close();
@@ -356,9 +358,10 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
            {
                String nomeVacina = rs.getString("vacina");
                String numeroEfeitos = rs.getString("numero_casos");
-
-               arrayEfeitosSecundarios.add(nomeVacina);
+               
                arrayEfeitosSecundarios.add(numeroEfeitos);
+               arrayEfeitosSecundarios.add(nomeVacina);
+               
            }
            rs.close();
            stm.close();
