@@ -1,6 +1,7 @@
 psql l43012 -U l43012 -h localhost
 pass: password
 
+CREATE TABLE centros(idCentro int, nomeCentro varchar(128), PRIMARY KEY(idCentro));
 
 CREATE TABLE filasCentro2 (id int, Nome varchar(128), PRIMARY KEY (id,Nome), FOREIGN KEY(id) REFERENCES centrovac1(id) ON DELETE CASCADE);
 

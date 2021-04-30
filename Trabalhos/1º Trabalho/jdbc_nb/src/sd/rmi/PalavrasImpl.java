@@ -51,18 +51,15 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
        
         try
         {
-            ResultSet rs = stm.executeQuery("select * from centrovac1");
+            ResultSet rs = stm.executeQuery("select * from centro");
                 
             while(rs.next())
             {
-                String id = rs.getString("id");
+                String id = rs.getString("idcentro");
                 String nome = rs.getString("nomecentro");
-                
-                String cidade = rs.getString("cidadecentro");
-                
+ 
                 arrayCentros.add(id);
                 arrayCentros.add(nome);
-                arrayCentros.add(cidade);
             }
             rs.close();
             stm.close();
@@ -93,7 +90,7 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
         Statement stm = connect_db.getStatement();
               
     	try {
-            ResultSet rs = stm.executeQuery("select COUNT(nome) as sizeFila FROM filasCentro3 natural inner join centrovac1 WHERE filasCentro3.id=" + id);
+            ResultSet rs = stm.executeQuery("select COUNT(codigo_registo) as sizeFila FROM fila_centro natural inner join centro WHERE fila_centro.idcentro = " + id);
 
             while(rs.next())
             {
@@ -136,18 +133,21 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
          try{
         	 
         	 //ResultSet rs = stm.executeQuery("select COUNT(id) as sizeFila FROM filasCentro3");
-        	 stm.executeUpdate("INSERT INTO filasCentro3 VALUES ("+randomNum+",'"+nome+"',DEFAULT)");
+        	 //stm.executeUpdate("INSERT INTO cliente1 VALUES (DEFAULT,'"+nome+"','"+genero+"',"+idade+",DEFAULT)");
 
-        	 ResultSet rs = stm.executeQuery("INSERT INTO codigosResposta VALUES (DEFAULT, '"+nome+"') RETURNING codigoResposta");
+        	 //ResultSet rs = stm.executeQuery("INSERT INTO fila_centro VALUES ("+randomNum+", '"+nome+"') RETURNING codigoResposta");
+        	 ResultSet rs = stm.executeQuery("INSERT INTO cliente1 VALUES (DEFAULT,'"+nome+"','"+genero+"',"+idade+",DEFAULT) RETURNING codigo_registo");
         	 
         	 rs.next();
 
-             int codigoResposta = rs.getInt("codigoResposta");
+             int codigoRegisto = rs.getInt("codigo_registo");
+             
+             stm.executeUpdate("INSERT INTO fila_centro VALUES ("+randomNum+","+codigoRegisto+")");
     
              rs.close();
         	 stm.close();
         	 
-        	 return "\nInscrição validada com sucesso. Guarde o código seguinte (para registo de toma da vacina): " + codigoResposta + "\n";
+        	 return "\nInscrição validada com sucesso. Guarde o código seguinte (para registo de toma da vacina): " + codigoRegisto +  "\n";
         	 
          	 //rs = stm.executeQuery("INSERT INTO filasCentro3 VALUES(DEFAULT, " + randomNum + ",'" + nome + "'));
         	
@@ -197,7 +197,7 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
     }
     
    @Override
-	public String registoVac(int codigo, String nome,String nomevac, String data, String tipo) throws RemoteException {
+	public String registoVac(int codigo,String nomevac, String data) throws RemoteException {
     		String inscricaoDone = "Inscrição efetuada com sucesso.";
   
 	        try 
@@ -215,11 +215,21 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
 	        try{
 	       	 
 	       	 //ResultSet rs = stm.executeQuery("select COUNT(id) as sizeFila FROM filasCentro3");
-	       	 stm.executeUpdate("INSERT INTO listavacinados VALUES ("+codigo+",'"+nome+"','"+nomevac+"','"+data+"','"+tipo+"')");   
-	       	
+	        ResultSet rs = stm.executeQuery("select idCentro as idCentro FROM fila_centro natural inner join centro WHERE codigo_registo = " + codigo);
+	        	
+	        //while(rs.next())
+            //{
+	        rs.next();
+            String str = rs.getString("idCentro");
+            int contaCentros = Integer.parseInt(str);
+
+            //}
+	       
+	        stm.executeUpdate("INSERT INTO lista_vacinados VALUES ("+contaCentros+","+codigo+",'"+nomevac+"','"+data+"')");
+	       
 	       	 stm.close();
 	       	 
-	       	 return "\nRegisto de vacinação concluido com sucesso. Obrigado " + nome + " pelo registo da vacina " + nomevac + " do tipo "+ tipo+ "\n";
+	       	 return "\nRegisto de vacinação concluido com sucesso. Obrigado "/* + nome + */+ " pelo registo da vacina " + nomevac+ "\n";
 	       	 
 	        	 //rs = stm.executeQuery("INSERT INTO filasCentro3 VALUES(DEFAULT, " + randomNum + ",'" + nome + "'));
 	       	
@@ -234,6 +244,142 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
 	        connect_db.disconnect();
 	        return inscricaoDone;
 	}
+   
+   @Override
+	public String registoEfeitosSecundarios(int codigo, String efeitos) throws RemoteException {
+	   
+       try 
+       {
+      	 connect_db.connect();
+       } 
+       
+       catch (Exception ex) 
+       {
+           Logger.getLogger(Palavras.class.getName()).log(Level.SEVERE, null, ex);
+       }
+  
+       Statement stm = connect_db.getStatement();
+
+       try{
+      	 
+    	   stm.executeUpdate("INSERT INTO efeitos_secundarios VALUES ("+codigo+",'"+efeitos+"')");
+    	   
+      	   stm.close();
+      	 
+      	 return "\nObrigado pelo seu feedback.\nCódigo usado: " + codigo +  " com os seguintes efeitos: " + efeitos + ".\n";
+      	 
+       	 //rs = stm.executeQuery("INSERT INTO filasCentro3 VALUES(DEFAULT, " + randomNum + ",'" + nome + "'));
+      	
+       }
+   
+       catch(Exception e)
+       {
+               e.printStackTrace();
+               System.out.print("Problems...");
+       }
+       
+       connect_db.disconnect();
+       return "Nada a acresentar";
+	}
+   	
+   
+   @Override
+	public ArrayList<String> listaVacinados() throws RemoteException {
+	   ArrayList<String> arrayListaVacinados = new ArrayList<>();
+       
+       try 
+       {
+           connect_db.connect();
+       } 
+       catch (Exception ex) 
+       {
+           Logger.getLogger(PalavrasImpl.class.getName()).log(Level.SEVERE, null, ex);
+       }
+       
+       Statement stm = connect_db.getStatement();
+      
+       try
+       {
+           ResultSet rs = stm.executeQuery("select vacina, count(vacina) as numero_vacinas\n"
+           		+ "from lista_vacinados\n"
+           		+ "group by vacina");
+               
+           while(rs.next())
+           {
+               String nomeVacina = rs.getString("vacina");
+               String numeroVacinas = rs.getString("numero_vacinas");
+
+               arrayListaVacinados.add(nomeVacina);
+               arrayListaVacinados.add(numeroVacinas);
+           }
+           rs.close();
+           stm.close();
+       }
+       
+       catch(Exception e){
+           e.printStackTrace();
+           System.out.print("Problems...");
+       }
+       
+       connect_db.disconnect();
+       return arrayListaVacinados;
+	}
+   
+   
+   
+   @Override
+	public ArrayList<String> listaEfeitosSecundarios() throws RemoteException {
+	   ArrayList<String> arrayEfeitosSecundarios = new ArrayList<>();
+       
+       try 
+       {
+           connect_db.connect();
+       } 
+       catch (Exception ex) 
+       {
+           Logger.getLogger(PalavrasImpl.class.getName()).log(Level.SEVERE, null, ex);
+       }
+       
+       Statement stm = connect_db.getStatement();
+      
+       try
+       {
+           ResultSet rs = stm.executeQuery("with X as (select vacina, count(distinct codigo_registo) as numero_casos\n"
+           		+ "from lista_vacinados NATURAL join efeitos_secundarios\n"
+           		+ "           where efeitos != 'Null'\n"
+           		+ "group by vacina)\n"
+           		+ "\n"
+           		+ "select vacina, numero_casos\n"
+           		+ "from X");
+               
+           while(rs.next())
+           {
+               String nomeVacina = rs.getString("vacina");
+               String numeroEfeitos = rs.getString("numero_casos");
+
+               arrayEfeitosSecundarios.add(nomeVacina);
+               arrayEfeitosSecundarios.add(numeroEfeitos);
+           }
+           rs.close();
+           stm.close();
+       }
+       
+       catch(Exception e){
+           e.printStackTrace();
+           System.out.print("Problems...");
+       }
+       
+       connect_db.disconnect();
+       return arrayEfeitosSecundarios;
+	}
+   
+   
+   
+   
+   
+   
+   
+   
 
 	@Override
 	public String primeiraPalavra(String s) throws RemoteException {

@@ -17,6 +17,12 @@ public interface Palavras extends java.rmi.Remote {  //interface java usavel em 
     
     public int contaCentros() throws java.rmi.RemoteException;
     
-    public String registoVac(int codigo, String nome,String nomevac, String data, String tipo) throws java.rmi.RemoteException;
+    public String registoVac(int codigo,String nomevac, String data) throws java.rmi.RemoteException;
+    
+    public String registoEfeitosSecundarios(int codigo, String efeitos) throws java.rmi.RemoteException;
+    
+    public ArrayList<String> listaVacinados() throws java.rmi.RemoteException;
+    
+    public ArrayList<String> listaEfeitosSecundarios() throws java.rmi.RemoteException;
 
 }

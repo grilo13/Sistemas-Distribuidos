@@ -46,7 +46,7 @@ public class PalavrasClient {
 
                         else
                         {
-                            for(int i = 1; i < arrayCentros.size(); i = i+3)
+                            for(int i = 1; i < arrayCentros.size(); i = i+2)
                             {
                                 System.out.println(arrayCentros.get(i));
                             }
@@ -75,6 +75,7 @@ public class PalavrasClient {
 	                	String genero = scanner3.next();
 	                	
 	                	int numerodeCentros = obj.contaCentros();
+	                	System.out.println("Numero de centros: " + numerodeCentros);
 	                	
 	                	String inscricao = obj.inscricaoVac(numerodeCentros,nome,genero, idade);
 	                	
@@ -83,24 +84,71 @@ public class PalavrasClient {
 	                    break;
 	                case "4":
 	                	System.out.println("Registando a vacinação...");
-	                	System.out.println("Insira o codigo de resposta, o seu nome, nome da vacina, data da toma e tipo da mesma:");
+	                	System.out.println("Insira o codigo de resposta, nome da vacina e data da toma da mesma:");
 	                	Scanner scanner4 = new Scanner(System.in);
 	                	int codigo = scanner4.nextInt();
-	                	String nome2 = scanner4.nextLine();
-	                	String nomeVac = scanner4.nextLine();
-	                	String dataVac = scanner4.nextLine();
-	                	String tipoVac = scanner4.nextLine();
+	                	String nomeVac = scanner4.next();
+	                	String dataVac = scanner4.next();
+	                	//String tipoVac = scanner4.nextLine();
 	                 
 	                	
-	                	String registo = obj.registoVac(codigo, nome2, nomeVac, dataVac, tipoVac);
+	                	String registo = obj.registoVac(codigo, nomeVac, dataVac);
 	                	
 	                	System.out.print(registo);
 	                	break;
 	                case "5":
 	                	System.out.println("Reportando efeitos secundários...");
+	                	System.out.println("Insira o codigo com os efeitos secundários que teve:");
+	                	Scanner scanner5 = new Scanner(System.in);
+	                	int codigo1 = scanner5.nextInt();
+	                	String efeitos = scanner5.next();
+	                	efeitos+=scanner5.nextLine();
+	                	
+	                	String efeitos_obtidos = obj.registoEfeitosSecundarios(codigo1, efeitos);
+	                	System.out.println(efeitos_obtidos);
 	                    break;
 	                case "6":
 	                	System.out.println("Gerando a lista de todas as vacinas e efeitos secundários...");
+	                	ArrayList<String> arrayListaVacinados = obj.listaVacinados();
+	                      
+                        if(arrayListaVacinados.isEmpty() == true)
+                        {
+                            System.out.println("Não existem centros de vacinação no momento.");
+                        }
+
+                        else
+                        {
+                            for(int i = 0; i < arrayListaVacinados.size(); i = i+1)
+                            {
+                            	if(i % 2 != 0) {
+                            		System.out.println(arrayListaVacinados.get(i));
+                            	} else {
+                            		System.out.print(arrayListaVacinados.get(i) + " ");
+                            	}
+                            }
+                        }
+                        
+                        System.out.println("Efeitos secundários por vacina");
+                        
+                        ArrayList<String> arrayEfeitosSecundarios = obj.listaEfeitosSecundarios();
+	                      
+                        if(arrayEfeitosSecundarios.isEmpty() == true)
+                        {
+                            System.out.println("Não existem centros de vacinação no momento.");
+                        }
+
+                        else
+                        {
+                            for(int i = 0; i < arrayEfeitosSecundarios.size(); i = i+1)
+                            {
+                            	if(i % 2 != 0) {
+                            		System.out.println(arrayEfeitosSecundarios.get(i));
+                            	} else {
+                            		System.out.print(arrayEfeitosSecundarios.get(i) + " ");
+                            	}
+                            }
+                        }
+
 	                    break;
 	                case "0":
 	                    System.exit(0);
