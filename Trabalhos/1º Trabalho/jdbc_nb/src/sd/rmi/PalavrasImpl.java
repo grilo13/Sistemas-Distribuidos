@@ -20,20 +20,21 @@ import java.rmi.server.*;
 * 
 */
 
-/**
- * CLASSE DO OBJETO REMOTO Tem a parte funcional... a implementação das
- * operações do serviço.
- */
 
 public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.io.Serializable {
 	
-	ConnectDB connect_db = new ConnectDB();
+	ConnectDB connect_db;
 
     // deve existir um construtor
-    public PalavrasImpl() throws java.rmi.RemoteException {
-        super();
+    public PalavrasImpl(String host, String db, String user, String pw) throws java.rmi.RemoteException {
+    	this.connect_db = new ConnectDB(host,db,user,pw);
+        //super();
     }
     
+    /* Função que é chamada e retorna numa arraylist todos os centros disponiveis para vacinamento (id do centro seguido do nome do mesmo)
+     * Vai ver na base de dados referente aos centros criada
+     */
+    @Override
     public ArrayList<String> consultarCentros() throws java.rmi.RemoteException
     {
         ArrayList<String> arrayCentros = new ArrayList<>();
@@ -65,9 +66,9 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
             stm.close();
         }
         
-        catch(Exception e){
+        catch(SQLException e){
             e.printStackTrace();
-            System.out.print("Problems...");
+            System.out.print("\nErro a aceder às tabelas pretendidas.\n");
         }
         
         connect_db.disconnect();
@@ -75,6 +76,10 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
 
     }
     
+    /* Função que recebe como argumento o id do centro que pretendemos ver o tamanho da fila de espera
+     * Vai fazer um Count de todos os codigos registados nesse centro e retorna esse valor
+     */
+    @Override
     public int consultarFila(int id) throws java.rmi.RemoteException
     {
  
@@ -91,11 +96,14 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
               
     	try {
             ResultSet rs = stm.executeQuery("select COUNT(codigo_registo) as sizeFila FROM fila_centro natural inner join centro WHERE fila_centro.idcentro = " + id);
-
+            
+            
             while(rs.next())
             {
             	String str = rs.getString("sizeFila");
             	int sizeFila = Integer.parseInt(str);
+            	rs.close();
+            	connect_db.disconnect();
             	return sizeFila;
 
             }
@@ -110,9 +118,18 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
 
     }
     
+    /* Função que recebe como argumentos um int CentrosDisponiveis(que provém de uma outra função que calcula o numero de centros existentes), uma vez que vamos
+     * escolher um centro aleatório para inscrever o cliente que pede a inscrição. 
+     * Para além disso recebe o nome da pessoa, o seu género e a sua idade.
+     * Dentro da função, vamos inserir dentro da base de dados cliente1 os valores do nome, genero, idade e, idCliente e CódigoRegisto que serão dois valores 
+     * para cada cliente inscrito (vai servir posteriormente para o registo da vacinação e para a lista de vacinados e de efeitos secundários reportados)
+     * Também inserimos esse mesmo cliente então, num centro aleatório entre aqueles que se encontram disponiveis (o registo é feito pelo codigo registo do cliente)
+     */
+    
+    @Override
     public String inscricaoVac(int centrosDisponiveis,String nome, String genero, int idade) throws java.rmi.RemoteException
     {
-    	 String inscricaoDone = "Inscrição efetuada com sucesso.";
+    	 String inscricaoDone = "Inscrição não efetuada por algum motivo.";
     	 
     	 int randomNum = ThreadLocalRandom.current().nextInt(1, centrosDisponiveis+1);
     	 System.out.print(randomNum);
@@ -131,11 +148,6 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
          Statement stm = connect_db.getStatement();
 
          try{
-        	 
-        	 //ResultSet rs = stm.executeQuery("select COUNT(id) as sizeFila FROM filasCentro3");
-        	 //stm.executeUpdate("INSERT INTO cliente1 VALUES (DEFAULT,'"+nome+"','"+genero+"',"+idade+",DEFAULT)");
-
-        	 //ResultSet rs = stm.executeQuery("INSERT INTO fila_centro VALUES ("+randomNum+", '"+nome+"') RETURNING codigoResposta");
         	 ResultSet rs = stm.executeQuery("INSERT INTO cliente1 VALUES (DEFAULT,'"+nome+"','"+genero+"',"+idade+",DEFAULT) RETURNING codigo_registo");
         	 
         	 rs.next();
@@ -147,10 +159,9 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
              rs.close();
         	 stm.close();
         	 
-        	 return "\nInscrição validada com sucesso no centro " + randomNum + ".\nGuarde o código seguinte (para registo de toma da vacina): " + codigoRegisto +  "\n";
+        	 connect_db.disconnect();
         	 
-         	 //rs = stm.executeQuery("INSERT INTO filasCentro3 VALUES(DEFAULT, " + randomNum + ",'" + nome + "'));
-        	
+        	 return "\nInscrição validada com sucesso no centro " + randomNum + ".\nGuarde o código seguinte (para registo de toma da vacina): " + codigoRegisto +  "\n";
          }
      
          catch(Exception e)
@@ -163,6 +174,10 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
          return inscricaoDone;
     }
     
+    /* Função que vai retornar o número de centros existentes na base de dados
+     * Vai ser usada posteriormente para fazer a inscrição aleaoria de uma pessoa num centro
+     */
+    @Override
     public int contaCentros() throws RemoteException 
     {
     	try 
@@ -183,6 +198,7 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
             {
             	String str = rs.getString("numeroCentrosExistentes");
             	int contaCentros = Integer.parseInt(str);
+            	connect_db.disconnect();
             	return contaCentros;
 
             }
@@ -196,9 +212,15 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
     	
     }
     
+    /* Função que recebe como argumentos o código de registo do cliente, o nome da vacina tomada e a data da toma da mesma
+     * Irá primeiro que tudo fazer um select para retornar o idCentro onde esse código ficou inscrito (para depois ser tirado da fila)
+     * Iremos depois colocar esse cliente (pelo código) na lista de utentes vacinados (nova tabela da base de dados que conterá os utentes vacinados)
+     * Depois disso iremos fazer um delete para eliminar da tabela fila_centro o utente que já foi vacinado (remover o utente do centro de inscrição)
+     * Retorna uma string a dizer ao utente que foi registado com a vacina X no dia Y.
+     */
    @Override
 	public String registoVac(int codigo,String nomevac, String data) throws RemoteException {
-    		String inscricaoDone = "Inscrição efetuada com sucesso.";
+    		String inscricaoDone = "Registo de vacinação falhou por alguma razão.";
   
 	        try 
 	        {
@@ -214,27 +236,22 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
 	
 	        try{
 	       	 
-	       	 //ResultSet rs = stm.executeQuery("select COUNT(id) as sizeFila FROM filasCentro3");
 	        ResultSet rs = stm.executeQuery("select idCentro as idCentro FROM fila_centro natural inner join centro WHERE codigo_registo = " + codigo);
-	        	
-	        //while(rs.next())
-            //{
+	        
 	        rs.next();
             String str = rs.getString("idCentro");
             int contaCentros = Integer.parseInt(str);
 
-            //}
 	       
-	         stm.executeUpdate("INSERT INTO lista_vacinados VALUES ("+contaCentros+","+codigo+",'"+nomevac+"','"+data+"')");
+	        stm.executeUpdate("INSERT INTO lista_vacinados VALUES ("+contaCentros+","+codigo+",'"+nomevac+"','"+data+"')");
 	         
-	         stm.executeUpdate("DELETE from fila_centro where codigo_registo=" + codigo);
+	        stm.executeUpdate("DELETE from fila_centro where codigo_registo=" + codigo);
 	       
-	       	 stm.close();
-	       	 
-	       	 return "\nRegisto de vacinação concluido com sucesso. Obrigado "/* + nome + */+ " pelo registo da vacina " + nomevac+ "\n";
-	       	 
-	        	 //rs = stm.executeQuery("INSERT INTO filasCentro3 VALUES(DEFAULT, " + randomNum + ",'" + nome + "'));
+	       	stm.close();
 	       	
+	       	connect_db.disconnect();
+	       	 
+	       	return "\nRegisto de vacinação concluido com sucesso. Obrigado utente com o código "+ codigo +  " pelo registo da vacina " + nomevac + " no dia " + data + " .\n";	       	
 	        }
 	    
 	        catch(Exception e)
@@ -247,6 +264,9 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
 	        return inscricaoDone;
 	}
    
+   /* Função que recebe como argumentos o código de registo e uma string com os efeitos que o utente teve
+    * Irá fazer um insert na tabela efeitos_secundários, que tem o codigo registo e o efeito que o utente especificou
+    */
    @Override
 	public String registoEfeitosSecundarios(int codigo, String efeitos) throws RemoteException {
 	   
@@ -267,10 +287,10 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
     	   stm.executeUpdate("INSERT INTO efeitos_secundarios VALUES ("+codigo+",'"+efeitos+"')");
     	   
       	   stm.close();
+      	   
+      	 connect_db.disconnect();
       	 
       	 return "\nObrigado pelo seu feedback.\nCódigo usado: " + codigo +  " com os seguintes efeitos: " + efeitos + ".\n";
-      	 
-       	 //rs = stm.executeQuery("INSERT INTO filasCentro3 VALUES(DEFAULT, " + randomNum + ",'" + nome + "'));
       	
        }
    
@@ -281,10 +301,12 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
        }
        
        connect_db.disconnect();
-       return "Nada a acresentar";
+       return "Registo não efeutado por alguma razão.";
 	}
    	
-   
+   /* Função que retorna um ArrayList com o numero de vacinas de uma certa vacina existente na tabela lista_vacinados
+    * Número de vacinas mais nome da vacina para todas aquelas que existam
+    */
    @Override
 	public ArrayList<String> listaVacinados() throws RemoteException {
 	   ArrayList<String> arrayListaVacinados = new ArrayList<>();
@@ -328,7 +350,9 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
 	}
    
    
-   
+   /* Função que retorna um ArrayList com o numero de efeitos secundários existentes para cada vacina existente
+    * fazendo um select e um count dos codigos de registo dentro da tabela efeitos_secundários e lista_vacinados conseguimos fazê-lo
+    */
    @Override
 	public ArrayList<String> listaEfeitosSecundarios() throws RemoteException {
 	   ArrayList<String> arrayEfeitosSecundarios = new ArrayList<>();
@@ -375,68 +399,4 @@ public class PalavrasImpl extends UnicastRemoteObject implements Palavras, java.
        connect_db.disconnect();
        return arrayEfeitosSecundarios;
 	}
-   
-   
-   
-   
-   
-   
-   
-   
-
-	@Override
-	public String primeiraPalavra(String s) throws RemoteException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<String> divide(String s) throws RemoteException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-    // ... e a implementação de
-    // cada método declarado na interface remota
-    
-    
-    /**
-     * devolve a primeira palavra da frase recebida
-     *
-     * @param s
-     * @return
-     * @throws java.rmi.RemoteException
-     */
-    /*public String primeiraPalavra(String s) throws java.rmi.RemoteException {
-        System.err.println("invocação primeiraPalavra() com: " + s);
-        String s2 = s.trim();  // remove espacos no inicio ou fim
-        int k = s2.indexOf(" ");  // indice de " "
-        if (k < 0) // nao tem espacos
-        {
-            return s2;
-        } else {
-            return s2.substring(0, k);  // apenas a 1a palavra
-        }
-    }
-
-    
-     * devolve um vector com cada palavra da expressão recebida
-     *
-     * @param s
-     * @return
-     * @throws java.rmi.RemoteException
-     
-    public java.util.List<String> divide(String s) throws java.rmi.RemoteException {
-        System.err.println("invocação divide() com: " + s);
-        java.util.LinkedList<String> v = new java.util.LinkedList<>();
-        String s2 = s.trim();
-
-        String[] s2pals = s2.split(" ");
-
-        for (int i = 0; i < s2pals.length; i++) {
-            v.add(s2pals[i]);       // adiciona a palavra i
-        }
-        return v;
-    }*/
-
 }

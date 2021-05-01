@@ -16,6 +16,10 @@ import java.util.Scanner;
 
 public class PalavrasClient {
 	
+	
+	/*
+	 * Função menu que vai ser mostrada ao cliente todas as vezes até ele desejar não executar mais nenhuma opção	 * 
+	 */
 	 public static void menu(Palavras obj) throws RemoteException {
 		 while (true) {
 	            System.out.print("\n------------MENU------------\nSelecione a opção que deseja:\n"
@@ -46,9 +50,14 @@ public class PalavrasClient {
 
                         else
                         {
-                            for(int i = 1; i < arrayCentros.size(); i = i+2)
+                            for(int i = 0; i < arrayCentros.size(); i = i+1)
                             {
-                                System.out.println(arrayCentros.get(i));
+                                
+                                if(i % 2 != 0) {
+                                	System.out.println("  Nome do centro: " +arrayCentros.get(i));
+                                } else {
+                                	System.out.print("Id do centro: " + arrayCentros.get(i));
+                                }
                             }
                         }
 
@@ -67,64 +76,73 @@ public class PalavrasClient {
 		                	
 		                	int tamanhoFila = obj.consultarFila(verCentro);
 		                	
-		                	System.out.println("O Centro escolhido tem uma lista de espera de " + tamanhoFila + " utentes.");
-		                	
-		                	System.out.println("\nDeseja consultar mais algum centro? S (sim) ou N (não)");
-		                	String escolha = scanner2.next();
-		                	
-		                	if(escolha.equals("N")) {
-		                		auxiliar = 1;
-		                	} else if(escolha.equals("S")) {
-		                		continue;
-		                	}else {
-		                		System.out.println("Formato de resposta não reconhecido.");
+		                	if(tamanhoFila == 0) {
+		                		System.out.println("\nConsulta de fila de espera para o centro pretendido não existe no momento.");
 		                		break;
+		                	} else {
+		                		System.out.println("O Centro escolhido tem uma lista de espera de " + tamanhoFila + " utentes.");
+			                	
+			                	System.out.println("\nDeseja consultar mais algum centro? S (sim) ou N (não)");
+			                	String escolha = scanner2.next();
+			                	
+			                	if(escolha.equals("N")) {
+			                		auxiliar = 1;
+			                	} else if(escolha.equals("S")) {
+			                		continue;
+			                	}else {
+			                		System.out.println("Formato de resposta não reconhecido.");
+			                		break;
+			                	}
 		                	}
+		                	
+		              
 	                	}
 	                    break;
 	                    
 	                case "3":
-	                	System.out.println("Fazendo inscrição para vacinação...");
-	                	System.out.println("Insira o seu nome, idade e genero:");
+	                	System.out.println("\n--->  Inscrição para Vacinação  <---\n");
+	                	System.out.println("Insira o seu nome, idade e genero: (nome enter, idade enter, etc)");
 	                	Scanner scanner3 = new Scanner(System.in);
 	                	String nome = scanner3.nextLine();
 	                	int idade = scanner3.nextInt();
 	                	String genero = scanner3.next();
 	                	
 	                	int numerodeCentros = obj.contaCentros();
-	                	System.out.println("Numero de centros: " + numerodeCentros);
 	                	
 	                	String inscricao = obj.inscricaoVac(numerodeCentros,nome,genero, idade);
 	                	
 	                	System.out.print(inscricao);
-	                	
 	                    break;
+	                    
 	                case "4":
-	                	System.out.println("Registando a vacinação...");
-	                	System.out.println("Insira o codigo de resposta, nome da vacina e data da toma da mesma:");
+	                	System.out.println("\n--->  Registo de Vacinação Efetuada  <---\n");
+	                	System.out.println("Insira o codigo de resposta seguido do nome da vacina e data da toma da mesma (enter depois de cada um):");
 	                	Scanner scanner4 = new Scanner(System.in);
 	                	int codigo = scanner4.nextInt();
 	                	String nomeVac = scanner4.next();
-	                	String dataVac = scanner4.next();
-	                	//String tipoVac = scanner4.nextLine();
-	                 
-	                	
+	                	String dataVac = scanner4.next(); 
+	               
 	                	String registo = obj.registoVac(codigo, nomeVac, dataVac);
 	                	
 	                	System.out.print(registo);
 	                	break;
+	                	
 	                case "5":
-	                	System.out.println("Reportando efeitos secundários...");
-	                	System.out.println("Insira o codigo com os efeitos secundários que teve:");
+	                	System.out.println("\n--->  Reporte de Efeitos Secundários Após a Toma da Vacina  <---\n");
+	                	System.out.println("Insira o código seguido dos efeitos secundários que teve (se não teve efeitos secundários não engane):\n");
 	                	Scanner scanner5 = new Scanner(System.in);
 	                	int codigo1 = scanner5.nextInt();
 	                	String efeitos = scanner5.next();
 	                	efeitos+=scanner5.nextLine();
 	                	
 	                	String efeitos_obtidos = obj.registoEfeitosSecundarios(codigo1, efeitos);
+	                	
 	                	System.out.println(efeitos_obtidos);
 	                    break;
+	                    
 	                case "6":
+	                	int total = 0;
+	                	int total2 = 0;
 	                	System.out.println("\n--->  Lista de vacinados  <---\n");
 	                	ArrayList<String> arrayListaVacinados = obj.listaVacinados();
 	                      
@@ -141,10 +159,11 @@ public class PalavrasClient {
                             		System.out.println(arrayListaVacinados.get(i));
                             	} else  {
                             		System.out.print(arrayListaVacinados.get(i) + " pessoas vacinadas com ");
+                            		total = total + Integer.parseInt(arrayListaVacinados.get(i));
                             	}
                             }
                         }
-                        
+
                         System.out.println("\n--->  Lista de Efeitos Secundários por vacina  <---\n");
                         
                         ArrayList<String> arrayEfeitosSecundarios = obj.listaEfeitosSecundarios();
@@ -162,9 +181,19 @@ public class PalavrasClient {
                             		System.out.println(arrayEfeitosSecundarios.get(i));
                             	} else {
                             		System.out.print(arrayEfeitosSecundarios.get(i) + " pessoas tiveram efeitos secundários com a vacina da ");
+                            		total2 = total2 + Integer.parseInt(arrayEfeitosSecundarios.get(i));
                             	}
                             }
                         }
+                        
+                        
+                        System.out.println("\n-->   Estatísticas  <---");
+                        System.out.println("\nTotal de pessoas vacinadas: " + total);
+                        System.out.println("Total de pessoas com efeitos secundários após a toma da vacina: " + total2);
+                        int percentagem = (100 * total2) / total;
+                        int percentagem2 = 100 - percentagem;
+                        System.out.println(percentagem + "% das pessoas que foram vacinadas tiveram efeitos secundários");
+                        System.out.println(percentagem2 + "% das pessoas que foram vacinadas não tiveram efeitos secundários");
 
 	                    break;
 	                case "0":
@@ -182,7 +211,7 @@ public class PalavrasClient {
 		String regHost = "localhost";
 		String regPort = "9000";  // porto do binder
 	
-		if (args.length !=2) { // requer 3 argumentos
+		if (args.length !=2) { // requer 2 argumentos
 		    System.out.println
 			("Usage: java sd.rmi.PalavrasClient registryHost registryPort");
 		    System.exit(1);
@@ -197,7 +226,6 @@ public class PalavrasClient {
 		    
 	
 		    // invocacao de métodos remotos
-		    
 		    menu(obj);
 	
 		} 

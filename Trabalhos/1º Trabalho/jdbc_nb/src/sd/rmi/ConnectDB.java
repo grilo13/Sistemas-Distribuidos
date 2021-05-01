@@ -8,13 +8,20 @@ import java.sql.*;
 
 public class ConnectDB {
 
-    private String PG_HOST="localhost";
-    private String PG_DB="l43012";
-    private String USER="l43012";
-    private String PWD="password";
+    private String PG_HOST;//="localhost";
+    private String PG_DB;//="l43012";
+    private String USER;//="l43012";
+    private String PWD;//="password";
 
     Connection con = null;
     Statement stmt = null;
+    
+    public ConnectDB(String host, String db, String user, String pw) {
+        PG_HOST=host;
+        PG_DB= db;
+        USER=user;
+        PWD= pw;
+    }
 
     public void connect() throws Exception {
         try {
