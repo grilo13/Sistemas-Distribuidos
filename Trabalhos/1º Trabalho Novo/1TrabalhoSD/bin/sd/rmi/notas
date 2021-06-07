@@ -1,0 +1,29 @@
+psql l43012 -U l43012 -h localhost
+pass: password
+
+--> Testes de tabelas
+
+CREATE TABLE centros(idCentro int, nomeCentro varchar(128), PRIMARY KEY(idCentro));
+
+CREATE TABLE filasCentro2 (id int, Nome varchar(128), PRIMARY KEY (id,Nome), FOREIGN KEY(id) REFERENCES centrovac1(id) ON DELETE CASCADE);
+
+
+INSERT INTO filasCentro1(id,Nome) VALUES (1,'João Lopes'), (1,'Diogo Pinto'), (1,'Ruben Farinha');
+
+
+CREATE TABLE filasCentro3 (id int, Nome varchar(128), ordem SERIAL, PRIMARY KEY (id,Nome), FOREIGN KEY(id) REFERENCES centrovac1(id) ON DELETE CASCADE);
+
+INSERT INTO filasCentro3(id,Nome,ordem) VALUES (1,'João Lopes',DEFAULT), (1,'Diogo Pinto',DEFAULT), (1,'Ruben Farinha',DEFAULT);
+
+----------------------------------------
+CREATE TABLE cliente (idCliente SERIAL, nomeCliente varchar(128), genero varchar(30), idade int, PRIMARY KEY (idCliente, nomeCliente));
+---------------------------------------
+REATE TABLE listaVacinados(codigoResposta Serial, 
+							idCentro int,
+							nomeVacina varchar(128), 
+							tipoVacina varchar(128), 
+							PRIMARY KEY(codigoResposta, idCentro), 
+							FOREIGN KEY(codigoResposta) REFERENCES codigosResposta(codigoresposta) ON DELETE CASCADE, 
+							FOREIGN KEY(idCentro) REFERENCES filaCentros3(id) ON DELETE CASCADE);
+							
+----------------------------------------------------
