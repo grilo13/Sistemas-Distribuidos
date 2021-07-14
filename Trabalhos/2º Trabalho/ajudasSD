@@ -1,0 +1,23 @@
+curl -d '{"nomeUtente":"Joao Santos", "códigoRegisto":"3"}' -H 'Content-Type: application/json' http://localhost:8080/utente
+  
+curl -d '{"nomeCentro":"Centro de Évora"}' -H 'Content-Type: application/json' http://localhost:8080/centro
+
+curl -d '{"idCentro":1, "nomeCentro":"Centro de Évora", "nomeUtente":"Pedro Grilo", "idUtente":1}' -H 'Content-Type: application/json' http://localhost:8080/listaCentro
+
+POST METHOD
+curl -d '{"nomeCentro" : "Centro de Beja"}' -H "Content-Type: application/json" -X POST http://localhost:8080/centro
+
+curl -d '{"nomeCentro" : "Centro de Beja"}' -H "Content-Type: application/json" -X POST http://localhost:8080/centro
+
+curl -d '{"idCentro":1, "idUtente":1}' -H "Content-Type: application/json" -X POST http://localhost:8080/utente/fila
+
+curl -d '{"idCentro":1, "idUtente":1, "dataVacina":"21/07/2021"}' -H "Content-Type: application/json" -X POST http://localhost:8080/utente/filaVacinacao
+
+
+CREATE TABLE lista_centro(
+    idCentro int,
+    idUtente INT,
+    PRIMARY KEY(idCentro, idUtente),
+    FOREIGN KEY(idCentro) REFERENCES centros_vacinacao on  delete restrict,
+  	FOREIGN KEY(idUtente) REFERENCES utentes on  delete restrict
+);
