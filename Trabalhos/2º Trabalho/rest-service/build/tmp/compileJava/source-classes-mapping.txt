@@ -1,28 +1,34 @@
-com/example/restservice/model/CentroVac.java
- com.example.restservice.model.CentroVac
-com/example/restservice/Greeting.java
- com.example.restservice.Greeting
-com/example/restservice/repository/UtentesRepository.java
- com.example.restservice.repository.UtentesRepository
 com/example/restservice/RestServiceApplication.java
  com.example.restservice.RestServiceApplication
-com/example/restservice/GreetingController.java
- com.example.restservice.GreetingController
+com/example/restservice/controller/CentroController.java
+ com.example.restservice.controller.CentroController
+com/example/restservice/model/FilaVacinacao.java
+ com.example.restservice.model.FilaVacinacao
+com/example/restservice/repository/ListaVacinadosRepository.java
+ com.example.restservice.repository.ListaVacinadosRepository
+com/example/restservice/controller/DgsController.java
+ com.example.restservice.controller.DgsController
+com/example/restservice/repository/NotificacaoUtenteRepository.java
+ com.example.restservice.repository.NotificacaoUtenteRepository
+com/example/restservice/model/VacinasDisponiveis.java
+ com.example.restservice.model.VacinasDisponiveis
+com/example/restservice/model/NotificacaoUtente.java
+ com.example.restservice.model.NotificacaoUtente
+com/example/restservice/model/ListaVacinados.java
+ com.example.restservice.model.ListaVacinados
+com/example/restservice/model/UtenteRegistado.java
+ com.example.restservice.model.UtenteRegistado
+com/example/restservice/model/VacinasDisponiveisPrimaryKey.java
+ com.example.restservice.model.VacinasDisponiveisPrimaryKey
+com/example/restservice/repository/FilaVacinacaoRepository.java
+ com.example.restservice.repository.FilaVacinacaoRepository
+com/example/restservice/model/CentroVac.java
+ com.example.restservice.model.CentroVac
+com/example/restservice/controller/UtenteController.java
+ com.example.restservice.controller.UtenteController
 com/example/restservice/repository/CentrosVacinacaoRepository.java
  com.example.restservice.repository.CentrosVacinacaoRepository
-com/example/restservice/model/CentroController.java
- com.example.restservice.model.CentroController
-com/example/restservice/model/Utentes.java
- com.example.restservice.model.Utentes
-com/example/restservice/repository/UserRepository.java
- com.example.restservice.repository.UserRepository
-com/example/restservice/model/User.java
- com.example.restservice.model.User
-com/example/restservice/repository/PopulateDB.java
- com.example.restservice.repository.PopulateDB
-com/example/restservice/repository/UserPrincipal.java
- com.example.restservice.repository.UserPrincipal
-com/example/restservice/repository/UserPrincipalDetailsService.java
- com.example.restservice.repository.UserPrincipalDetailsService
-com/example/restservice/security/SecurityConfiguration.java
- com.example.restservice.security.SecurityConfiguration
+com/example/restservice/repository/VacinasDisponiveisRepository.java
+ com.example.restservice.repository.VacinasDisponiveisRepository
+com/example/restservice/repository/UtentesRegistadosRepository.java
+ com.example.restservice.repository.UtentesRegistadosRepository
